@@ -1,0 +1,752 @@
+$ create /workspace/index.html
+$ create /workspace/index.html
+ERROR:
+Invalid `path` parameter: /workspace/index.html. File already exists at: /workspace/index.html. Cannot overwrite files using command `create`.
+$ view /workspace
+$ view /workspace
+Here's the files and directories up to 2 levels deep in /workspace, excluding hidden items:
+/workspace/
+/workspace/README.md
+/workspace/index.html
+2 hidden files/directories in this directory are excluded. You can use 'ls -la /workspace' to see them.
+$ edit /workspace/index.html
+$ edit /workspace/index.html
+ERROR:
+Invalid `new_str` parameter: <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Возражение "Дорого"</title>
+    <style>
+        :root {
+            --primary-dark: #1a2b4a;
+            --accent-red: #c0503a;
+            --success-green: #2d7a4f;
+            --warning-yellow: #d4a012;
+            --bg-gray: #f0f2f5;
+            --text-main: #333;
+            --white: #ffffff;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f4f6f9;
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: var(--white);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+        /* Header & Progress */
+        .header {
+            background: var(--primary-dark);
+            color: var(--white);
+            padding: 20px;
+            position: relative;
+        }
+        .progress-container {
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-red);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .score-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .branch-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .branch-tag.visible {
+            opacity: 1;
+        }
+        /* Content Area */
+        .content {
+            padding: 40px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        h1, h2 {
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 1.4rem; font-weight: 600; }
+        p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        .context-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        /* Chat Bubble */
+        .chat-bubble {
+            background: var(--bg-gray);
+            padding: 20px;
+            border-radius: 12px;
+            border-bottom-left-radius: 2px;
+            margin: 20px 0;
+            position: relative;
+            max-width: 80%;
+        }
+        .chat-bubble::before {
+            content: 'Клиент';
+            display: block;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .chat-bubble strong {
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .option-btn {
+            background: var(--white);
+            border: 2px solid var(--primary-dark);
+            color: var(--primary-dark);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: left;
+            transition: all 0.2s;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.7;
+            transform: none;
+        }
+        .option-btn.correct {
+            background: var(--success-green);
+            border-color: var(--success-green);
+            color: white;
+        }
+        .option-btn.wrong {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: white;
+        }
+        .option-btn.partial {
+            background: var(--warning-yellow);
+            border-color: var(--warning-yellow);
+            color: #333;
+        }
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-dark);
+            border-radius: 4px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .feedback-area.show {
+            display: block;
+        }
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        /* Next Button */
+        .next-btn-container {
+            margin-top: 25px;
+            text-align: right;
+            height: 50px; /* Reserve space */
+        }
+        .next-btn {
+            background: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background: #2c4475;
+        }
+        .next-btn.visible {
+            display: inline-block;
+            animation: slideUp 0.3s ease;
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .content {
+                padding: 20px;
+            }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="score-badge" id="scoreDisplay">Баллы: 0</div>
+        <div class="branch-tag" id="branchTag">Ситуация: Загрузка...</div>
+        <h2 id="stepTitle">Вступление</h2>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+    <div class="content" id="gameContent">
+        <!-- Dynamic Content Injected Here -->
+    </div>
+</div>
+<script>
+/**
+ * КОНФИГУРАЦИЯ И ДАННЫЕ
+ */
+const STEPS_CONFIG = {
+    intro: {
+        title: "Дело о потерянной сделке",
+        type: "static",
+        content: `
+            <p>Вы — старший консультант шоурума. К вам приходит коллега и просит разобрать ситуацию: клиент интересовался плиткой Kerama Marazzi, но в итоге ушёл «подумать».</p>
+            <p>Разберите, что пошло не так — и как надо было действовать.</p>
+        `,
+        btnText: "Начать разбор →"
+    },
+    scene: {
+        title: "Шоурум. Консультант только что завершил презентацию коллекции.",
+        type: "static",
+        bubble: "Ого... это выходит дороговато для меня.",
+        context: "Клиент замолчал и смотрит на ценник.",
+        question: "Что сделал консультант дальше? Найдите ошибку.",
+        btnText: "Смотреть →"
+    },
+    step1: {
+        title: "Шаг 1: Первая реакция",
+        question: "Клиент произнёс \"дороговато\". Первая реакция консультанта:",
+        options: [
+            { id: 'A', text: "«Подождите, давайте объясню, из чего складывается цена»", correct: false, feedback: "Перебивая клиента, вы лишаете его возможности высказаться. Он закрывается — и вы не узнаёте, что стоит за возражением." },
+            { id: 'B', text: "Молчит. Кивает. Даёт клиенту договорить.", correct: true, feedback: "Первый шаг — выслушать до конца. За словом \"дорого\" может стоять сравнение с конкурентом, неожиданная сумма или просто рефлекс." },
+            { id: 'C', text: "«Хорошо, могу предложить вам скидку»", correct: false, feedback: "Скидка на первую же реплику — это потеря маржи без понимания проблемы. Если за \"дорого\" стоит что-то другое, скидка не поможет." },
+            { id: 'D', text: "«Именно! Давайте я покажу вам коллекцию подешевле»", correct: false, feedback: "Вы решили за клиента, что ему не по карману, — без единого вопроса. Так теряются сделки в среднем и премиум-сегменте." }
+        ]
+    },
+    step2: {
+        title: "Шаг 2: Присоединение",
+        context: "Клиент замолчал. Нужно среагировать так, чтобы он почувствовал: вы на его стороне.",
+        question: "Что говорит консультант?",
+        options: [
+            { id: 'A', text: "«Это совсем не дорого — для такого качества цена адекватная!»", correct: false, feedback: "Спор о цене — тупик. Чем сильнее давите, тем сильнее клиент защищается." },
+            { id: 'B', text: "«Понятно...» (пауза, смотрит в сторону)", correct: false, feedback: "Расплывчатая реакция читается как растерянность. Клиент перестаёт видеть в вас эксперта." },
+            { id: 'C', text: "«У нас сейчас акция, могу оформить рассрочку»", correct: false, feedback: "Рассрочка — рабочий инструмент, но не сейчас. Вы ещё не знаете природу возражения." },
+            { id: 'D', text: "«Конечно, деньги — это важно.»", correct: true, feedback: "Короткое присоединение снимает напряжение. Клиент чувствует: вы не спорите — вы разделяете его позицию." }
+        ]
+    },
+    step3: {
+        title: "Шаг 3: Уточнение",
+        context: "Вы присоединились. Теперь нужно понять, что стоит за словом \"дорого\": клиент хочет скидку, не рассчитывал на сумму или видел дешевле.",
+        question: "Каким вопросом консультант уточняет возражение?",
+        options: [
+            { id: 'A', text: "«Вы вообще серьёзно рассматриваете покупку?»", correct: false, feedback: "Звучит как сомнение в намерениях клиента. Разрушает контакт." },
+            { id: 'B', text: "«Давайте я сразу покажу, что можно подобрать подешевле»", correct: false, feedback: "Снова переход к дешёвому без запроса клиента. Вы теряете и маржу, и доверие." },
+            { id: 'C', text: "«С чем вы сравниваете?»", correct: true, feedback: "Нейтральный открытый вопрос. Не давит, но даёт ключевую информацию для выбора тактики." },
+            { id: 'D', text: "«Сколько вы готовы потратить?»", partial: true, score: 0.5, feedback: "Рабочий вопрос, но прямолинейный. Клиент может почувствовать себя загнанным в рамки бюджета." }
+        ]
+    },
+    // Branch A
+    branchA_step4: {
+        tag: "Ситуация: клиент хочет скидку",
+        bubble: "Хотелось бы сэкономить... может, есть какая-то скидка?",
+        question: "Что отвечает консультант?",
+        options: [
+            { id: 'A', text: "«Скидки у нас строго по системе — я сам ничего не решаю.»", correct: false, feedback: "Перекладывание на \"систему\" убивает доверие." },
+            { id: 'B', text: "«При комплексном заказе — плитка плюс сантехника — вы получаете скидку на весь товар. Это и сэкономит деньги, и избавит от поездок.»", correct: true, feedback: "Комплексная скидка выгодна обеим сторонам. Вы увеличиваете чек за счёт доп. товаров." },
+            { id: 'C', text: "«Хорошо, давайте сделаю вам скидку 5%.»", correct: false, feedback: "Скидка без условий — потеря маржи без пользы." },
+            { id: 'D', text: "«Скидку не дам, но могу оформить рассрочку на 6 месяцев.»", correct: false, feedback: "Рассрочка звучит как помощь, но вы уходите от разговора о ценности продукта." }
+        ]
+    },
+    // Branch B
+    branchB_step4: {
+        tag: "Ситуация: клиент не рассчитывал бюджет",
+        bubble: "Я просто не рассчитывал на такую сумму...",
+        question: "Что отвечает консультант?",
+        options: [
+            { id: 'A', text: "«Плитка всегда стоит денег — такова специфика рынка.»", correct: false, feedback: "Констатация факта — не помощь. Клиент пришёл за решением." },
+            { id: 'B', text: "«Давайте рассмотрим два варианта: либо альтернативная коллекция в нужном бюджете, либо уменьшим декоративные элементы. На дизайн-проекте подберём баланс.»", correct: true, feedback: "Вы не теряете клиента и не обесцениваете дорогой товар. Дизайн-проект удерживает клиента." },
+            { id: 'C', text: "«Тогда, может, выберем что-нибудь подешевле?»", correct: false, feedback: "Вы сами обесцениваете дорогой товар. Клиент слышит: \"вам это не по карману\"." },
+            { id: 'D', text: "«Наверняка бывало: брали дешевле — потом переплачивали?»", correct: false, feedback: "Вы создаёте проблему там, где её не было. Клиент не говорил о качестве." }
+        ]
+    },
+    // Branch V (Part 1)
+    branchV_step4_1: {
+        tag: "Ситуация: сравнение с конкурентом",
+        bubble: "Я видел похожую плитку в другом месте — там дешевле.",
+        question: "Что спрашивает консультант первым делом?",
+        options: [
+            { id: 'A', text: "«Цены у нас единые по городу — скорее всего, вы ошибаетесь.»", correct: false, feedback: "Вы ставите под сомнение слова клиента. Спорить бессмысленно." },
+            { id: 'B', text: "«Ну там, наверное, качество хуже — вы же понимаете, за что платите.»", correct: false, feedback: "Критика конкурентов — непрофессионально." },
+            { id: 'C', text: "«В каком магазине вы видели? Это была именно эта коллекция Kerama Marazzi?»", correct: true, feedback: "Принципиальный вопрос: клиент сравнивает нашу плитку с нашей (другой дилер) или с другим брендом?" }
+        ],
+        isMultiStep: true,
+        nextBubble: "Это была другая марка, не помню название."
+    },
+    // Branch V (Part 2)
+    branchV_step4_2: {
+        tag: "Ситуация: сравнение с конкурентом (продолжение)",
+        bubble: "Это была другая марка, не помню название.",
+        question: "Что говорит консультант?",
+        options: [
+            { id: 'A', text: "«Ну вот видите — другая марка, некорректное сравнение.»", correct: false, feedback: "Формально правы, но интонация \"вы ошиблись\" ставит клиента в неловкое положение." },
+            { id: 'B', text: "«Сравнивать разную плитку без учёта характеристик сложно. Только у нас вы можете составить дизайн-проект и купить плитку поштучно — не нужно переплачивать за лишние упаковки.»", correct: true, feedback: "Вы не спорите о цене — вы говорите о том, что отличает вас: дизайн-проект и продажа поштучно." },
+            { id: 'C', text: "«Kerama Marazzi — это премиум, поэтому и цена другая.»", partial: true, score: 0.5, feedback: "Ссылка на бренд работает, но слабо без конкретных преимуществ." },
+            { id: 'D', text: "«Давайте я покажу вам похожие варианты, которые подешевле.»", correct: false, feedback: "Переход к дешёвому без запроса клиента — потеря маржи и доверия." }
+        ]
+    },
+    step5: {
+        title: "Шаг 5: Завершение",
+        context: "Вы отработали возражение. Клиент кивает, но молчит. Самый частый провал — именно здесь.",
+        question: "Что делает консультант?",
+        options: [
+            { id: 'A', text: "Молчит. Ждёт, когда клиент сам что-нибудь скажет.", correct: false, feedback: "Пауза — подарок сомнениям клиента. В тишине он вспоминает все причины не покупать." },
+            { id: 'B', text: "«Итак, что вы решили? Давайте оформим?»", correct: true, feedback: "Прямой вопрос о готовности — профессионально и не навязчиво. Инициатива у консультанта." },
+            { id: 'C', text: "«Ну вы подумайте — приходите, когда решите.»", correct: false, feedback: "Вы сами отпускаете клиента. Инициатива потеряна." },
+            { id: 'D', text: "Протягивает визитку: «Вот мои контакты — звоните, если надумаете.»", correct: false, feedback: "Визитка — рабочий инструмент, но только если клиент уже сказал \"нет\" после всех аргументов." }
+        ]
+    },
+    result: {
+        type: "result"
+    },
+    bonus: {
+        title: "Ловушка профессионала",
+        context: "Одна из самых частых ошибок — принять решение за клиента ещё до того, как он что-то сказал.",
+        bubbleContext: "Клиент заходит в шоурум в простой одежде. Консультант сразу ведёт его к коллекции эконом-сегмента, не задав ни одного вопроса.",
+        question: "Что не так в действиях консультанта?",
+        options: [
+            { id: 'A', text: "Он правильно среагировал — сразу учёл возможности клиента", correct: false, feedback: "Внешность не определяет бюджет. Консультант теряет сделки в среднем и премиум-сегменте." },
+            { id: 'B', text: "Он начал с показа товара, а не с вопросов", correct: false, feedback: "Дело не в порядке — дело в том, что он выбрал товар по собственному предположению о бюджете." },
+            { id: 'C', text: "Он решил за клиента, что тому по карману — не спросив", correct: true, feedback: "Правило простое: начинай с вопросов и показывай лучшее — пусть клиент сам скажет, если это не то." }
+        ]
+    }
+};
+/**
+ * СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+ */
+let state = {
+    currentStep: 'intro',
+    currentBranch: null, // 'A', 'B', 'V'
+    score: 0,
+    maxScore: 5,
+    attemptCount: 0,
+    answered: false,
+    subStep: 0 // Для ветки V (0 = часть 1, 1 = часть 2)
+};
+/**
+ * ИНИЦИАЛИЗАЦИЯ
+ */
+function initGame() {
+    const branches = ['A', 'B', 'V'];
+    state.currentBranch = branches[Math.floor(Math.random() * branches.length)];
+    
+    // Настройка максимума баллов в зависимости от ветки
+    state.maxScore = (state.currentBranch === 'V') ? 6 : 5;
+    
+    // Сброс промежуточных состояний
+    state.score = 0;
+    state.subStep = 0;
+    state.answered = false;
+    state.currentStep = 'intro';
+    
+    updateScoreDisplay();
+    renderScreen();
+}
+/**
+ * ОТРИСОВКА ЭКРАНОВ
+ */
+function renderScreen() {
+    const container = document.getElementById('gameContent');
+    const stepTitle = document.getElementById('stepTitle');
+    const progressBar = document.getElementById('progressBar');
+    const branchTag = document.getElementById('branchTag');
+    
+    let html = '';
+    let progressPercent = 0;
+    // Логика прогресс-бара и заголовков
+    if (state.currentStep === 'intro') {
+        stepTitle.textContent = STEPS_CONFIG.intro.title;
+        progressPercent = 5;
+        branchTag.classList.remove('visible');
+        
+        html = `
+            ${STEPS_CONFIG.intro.content}
+            <div class="next-btn-container">
+                <button class="next-btn visible" onclick="nextStep()">${STEPS_CONFIG.intro.btnText}</button>
+            </div>
+        `;
+    } 
+    else if (state.currentStep === 'scene') {
+        stepTitle.textContent = STEPS_CONFIG.scene.title;
+        progressPercent = 10;
+        branchTag.classList.remove('visible');
+        html = `
+            <div class="chat-bubble">
+                <strong>${STEPS_CONFIG.scene.bubble}</strong>
+            </div>
+            <p class="context-text">${STEPS_CONFIG.scene.context}</p>
+            <p><strong>${STEPS_CONFIG.scene.question}</strong></p>
+            <div class="next-btn-container">
+                <button class="next-btn visible" onclick="nextStep()">${STEPS_CONFIG.scene.btnText}</button>
+            </div>
+        `;
+    }
+    else if (['step1', 'step2', 'step3', 'step5'].includes(state.currentStep)) {
+        const data = STEPS_CONFIG[state.currentStep];
+        stepTitle.textContent = data.title || `Шаг ${state.currentStep.replace('step', '')}`;
+        
+        // Расчет прогресса
+        if (state.currentStep === 'step1') progressPercent = 20;
+        if (state.currentStep === 'step2') progressPercent = 40;
+        if (state.currentStep === 'step3') progressPercent = 60;
+        if (state.currentStep === 'step5') progressPercent = 90;
+        branchTag.classList.remove('visible');
+        html = `
+            ${data.context ? `<p class="context-text">${data.context}</p>` : ''}
+            <p><strong>${data.question}</strong></p>
+            <div class="options-grid">
+                ${data.options.map(opt => `
+                    <button class="option-btn" onclick="handleOption('${opt.id}', this)">
+                        ${opt.text}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="feedback-area" id="feedback"></div>
+            <div class="next-btn-container">
+                <button class="next-btn" id="nextBtn" onclick="nextStep()">Далее →</button>
+            </div>
+        `;
+    }
+    else if (state.currentStep === 'branch4') {
+        // Обработка ветвления
+        let data;
+        let title = "Шаг 4: Реакция на ответ клиента";
+        
+        if (state.currentBranch === 'A') {
+            data = STEPS_CONFIG.branchA_step4;
+            progressPercent = 70;
+        } else if (state.currentBranch === 'B') {
+            data = STEPS_CONFIG.branchB_step4;
+            progressPercent = 70;
+        } else if (state.currentBranch === 'V') {
+            if (state.subStep === 0) {
+                data = STEPS_CONFIG.branchV_step4_1;
+                title = "Шаг 4 (часть 1): Сравнение";
+                progressPercent = 70;
+            } else {
+                data = STEPS_CONFIG.branchV_step4_2;
+                title = "Шаг 4 (часть 2): Аргументация";
+                progressPercent = 80;
+            }
+        }
+        stepTitle.textContent = title;
+        
+        // Показ тега ситуации только если он есть в данных
+        if (data.tag) {
+            branchTag.textContent = data.tag;
+            branchTag.classList.add('visible');
+        } else {
+            branchTag.classList.remove('visible');
+        }
+        // Если ветка V и это вторая часть, показываем предыдущий ответ клиента как контекст?
+        // Нет, по ТЗ просто показываем реплику клиента в пузыре.
+        
+        let optionsHtml = '';
+        if (state.currentBranch === 'V' && state.subStep === 0) {
+             // Для первой части ветки V всего 3 кнопки, но грид 2x2 оставим, будет одна пустая или растянем
+             // Лучше сделать адаптивно, но оставим grid, последняя ячейка пустая
+             optionsHtml = data.options.map(opt => `
+                <button class="option-btn" onclick="handleOption('${opt.id}', this)">
+                    ${opt.text}
+                </button>
+            `).join('');
+        } else {
+            optionsHtml = data.options.map(opt => `
+                <button class="option-btn" onclick="handleOption('${opt.id}', this)">
+                    ${opt.text}
+                </button>
+            `).join('');
+        }
+        html = `
+            <div class="chat-bubble">
+                <strong>${data.bubble}</strong>
+            </div>
+            <p><strong>${data.question}</strong></p>
+            <div class="options-grid">
+                ${optionsHtml}
+            </div>
+            <div class="feedback-area" id="feedback"></div>
+            <div class="next-btn-container">
+                <button class="next-btn" id="nextBtn" onclick="nextStep()">Далее →</button>
+            </div>
+        `;
+    }
+    else if (state.currentStep === 'result') {
+        stepTitle.textContent = "Результат";
+        progressPercent = 100;
+        branchTag.classList.remove('visible');
+        
+        const percentage = (state.score / state.maxScore) * 100;
+        let resultTitle = "";
+        let resultText = "";
+        
+        if (percentage >= 80) {
+            resultTitle = "Сделка закрыта ✓";
+            resultText = "Вы уверенно провели клиента через возражение: выслушали, присоединились, уточнили природу, ответили по существу и взяли инициативу в конце. Такой консультант закрывает сделку — клиент уходит не \"думать\", а с покупкой.";
+        } else if (percentage >= 50) {
+            resultTitle = "Почти — но клиент ушёл думать";
+            resultText = "Вы знаете схему, но в одном-двух шагах потеряли инициативу или упустили уточнение. Именно в этих точках разрушается большинство сделок. Посмотрите на шаги с ошибкой.";
+        } else {
+            resultTitle = "Клиент ушёл. Разберёмся почему.";
+            resultText = "Возражение \"дорого\" — не приговор для сделки. Это сигнал: клиент заинтересован, но ему нужна помощь. Перечитайте пояснения к каждому шагу — там ключ.";
+        }
+        let bonusButton = '';
+        if (state.attemptCount >= 2) {
+            bonusButton = `<button class="option-btn" style="width:100%; margin-top:20px; text-align:center; border-color: var(--accent-red); color: var(--accent-red);" onclick="startBonus()">[Бонусный разбор →]</button>`;
+        }
+        html = `
+            <div style="text-align: center;">
+                <h2 style="font-size: 2rem; color: var(--primary-dark); margin-bottom: 10px;">${resultTitle}</h2>
+                <p style="font-size: 1.2rem; margin-bottom: 30px;">Ваш счёт: <strong>${state.score}</strong> из ${state.maxScore}</p>
+                <p>${resultText}</p>
+                
+                <div style="margin-top: 40px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="next-btn visible" onclick="initGame()">Пройти ещё раз (новая ситуация)</button>
+                    <button class="next-btn visible" style="background: transparent; border: 2px solid var(--primary-dark); color: var(--primary-dark);" onclick="restartSameBranch()">Пройти ещё раз (та же ветка)</button>
+                </div>
+                ${bonusButton}
+            </div>
+        `;
+    }
+    else if (state.currentStep === 'bonus') {
+        stepTitle.textContent = STEPS_CONFIG.bonus.title;
+        progressPercent = 100;
+        branchTag.classList.remove('visible');
+        
+        const data = STEPS_CONFIG.bonus;
+        html = `
+            <p class="context-text">${data.context}</p>
+            <div class="chat-bubble" style="background: #fff3e0;">
+                <span style="font-size: 0.9rem; color: #666; display:block; margin-bottom:5px;">Ситуация:</span>
+                <strong>${data.bubbleContext}</strong>
+            </div>
+            <p><strong>${data.question}</strong></p>
+            <div class="options-grid" style="grid-template-columns: 1fr;">
+                ${data.options.map(opt => `
+                    <button class="option-btn" onclick="handleOption('${opt.id}', this)">
+                        ${opt.text}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="feedback-area" id="feedback"></div>
+            <div class="next-btn-container">
+                <button class="next-btn" id="nextBtn" onclick="finishBonus()">Завершить →</button>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+    progressBar.style.width = `${progressPercent}%`;
+}
+/**
+ * ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ШАГОВ
+ */
+function nextStep() {
+    state.answered = false;
+    
+    if (state.currentStep === 'intro') {
+        state.currentStep = 'scene';
+    } else if (state.currentStep === 'scene') {
+        state.currentStep = 'step1';
+    } else if (state.currentStep === 'step1') {
+        state.currentStep = 'step2';
+    } else if (state.currentStep === 'step2') {
+        state.currentStep = 'step3';
+    } else if (state.currentStep === 'step3') {
+        state.currentStep = 'branch4';
+        state.subStep = 0; // Сброс под-шага для ветки V
+    } else if (state.currentStep === 'branch4') {
+        if (state.currentBranch === 'V' && state.subStep === 0) {
+            state.subStep = 1; // Остаемся на branch4, но меняем под-шаг
+        } else {
+            state.currentStep = 'step5';
+        }
+    } else if (state.currentStep === 'step5') {
+        state.currentStep = 'result';
+        state.attemptCount++;
+    } else if (state.currentStep === 'bonus') {
+        state.currentStep = 'result';
+    }
+    
+    renderScreen();
+}
+function restartSameBranch() {
+    state.score = 0;
+    state.subStep = 0;
+    state.answered = false;
+    state.currentStep = 'intro';
+    // Ветка не меняется
+    updateScoreDisplay();
+    renderScreen();
+}
+function startBonus() {
+    state.currentStep = 'bonus';
+    state.answered = false;
+    renderScreen();
+}
+function finishBonus() {
+    state.currentStep = 'result';
+    renderScreen();
+}
+/**
+ * ОБРАБОТКА ВЫБОРА ОТВЕТА
+ */
+function handleOption(optionId, btnElement) {
+    if (state.answered) return; // Защита от повторного клика
+    state.answered = true;
+    const buttons = document.querySelectorAll('.option-btn');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    let currentData;
+    if (state.currentStep === 'branch4') {
+        if (state.currentBranch === 'A') currentData = STEPS_CONFIG.branchA_step4;
+        else if (state.currentBranch === 'B') currentData = STEPS_CONFIG.branchB_step4;
+        else if (state.currentBranch === 'V') {
+            currentData = (state.subStep === 0) ? STEPS_CONFIG.branchV_step4_1 : STEPS_CONFIG.branchV_step4_2;
+        }
+    } else if (state.currentStep === 'bonus') {
+        currentData = STEPS_CONFIG.bonus;
+    } else {
+        currentData = STEPS_CONFIG[state.currentStep];
+    }
+    const selectedOption = currentData.options.find(o => o.id === optionId);
+    
+    // Визуализация выбора
+    buttons.forEach(btn => btn.disabled = true);
+    
+    let isCorrect = false;
+    let points = 0;
+    if (selectedOption.correct) {
+        btnElement.classList.add('correct');
+        points = 1;
+        isCorrect = true;
+        feedbackEl.style.borderLeftColor = 'var(--success-green)';
+    } else if (selectedOption.partial) {
+        btnElement.classList.add('partial');
+        points = selectedOption.score || 0.5;
+        feedbackEl.style.borderLeftColor = 'var(--warning-yellow)';
+    } else {
+        btnElement.classList.add('wrong');
+        // Подсветить правильный ответ
+        buttons.forEach(btn => {
+            // Находим текст кнопки и сравниваем с правильным вариантом (упрощенно по индексу или тексту)
+            // Лучше найти по ID в данных
+            const btnText = btn.innerText.trim();
+            const correctOpt = currentData.options.find(o => o.correct);
+            if (correctOpt && btnText === correctOpt.text) {
+                btn.classList.add('correct');
+            }
+        });
+        feedbackEl.style.borderLeftColor = 'var(--accent-red)';
+    }
+    state.score += points;
+    updateScoreDisplay();
+    // Показ фидбека
+    const statusText = isCorrect ? "Верно!" : (selectedOption.partial ? "Частично верно" : "Ошибка");
+    feedbackEl.innerHTML = `
+        <span class="feedback-title" style="color: ${isCorrect ? 'var(--success-green)' : (selectedOption.partial ? 'var(--warning-yellow)' : 'var(--accent-red)')}">
+            ${statusText}
+        </span>
+        ${selectedOption.feedback}
+    `;
+    feedbackEl.classList.add('show');
+    // Показ кнопки "Далее"
+    if (nextBtn) {
+        nextBtn.classList.add('visible');
+    }
+}
+function updateScoreDisplay() {
+    document.getElementById('scoreDisplay').textContent = `Баллы: ${state.score}`;
+}
+// Запуск при загрузке
+window.onload = initGame;
+</script>
+</body>
+</html>. No replacement was performed. `new_str` and `old_str` must be different.
