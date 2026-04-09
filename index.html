@@ -1,1058 +1,3 @@
---- index.html (原始)
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажер: Возражение "Дорого"</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            color: #1a2b4a;
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            background: #e8ecf1;
-            padding: 20px;
-        }
-
-        .progress-bar {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        .progress-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #e8ecf1;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-
-        .progress-fill {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            height: 3px;
-            background: #c0503a;
-            transform: translateY(-50%);
-            z-index: 2;
-            transition: width 0.3s ease;
-        }
-
-        .progress-step {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #e8ecf1;
-            border: 3px solid #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            position: relative;
-            z-index: 3;
-            transition: all 0.3s ease;
-        }
-
-        .progress-step.active {
-            background: #c0503a;
-            color: white;
-        }
-
-        .progress-step.completed {
-            background: #2d7a4f;
-            color: white;
-        }
-
-        /* Score */
-        .score-display {
-            text-align: right;
-            padding: 10px 20px;
-            font-size: 14px;
-            color: #1a2b4a;
-            font-weight: 600;
-        }
-
-        /* Content */
-        .content {
-            padding: 40px;
-        }
-
-        h1 {
-            font-size: 28px;
-            color: #1a2b4a;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            font-size: 22px;
-            color: #1a2b4a;
-            margin-bottom: 15px;
-        }
-
-        .context {
-            font-size: 14px;
-            color: #667;
-            margin-bottom: 15px;
-            font-style: italic;
-        }
-
-        .scene-text {
-            font-size: 16px;
-            margin-bottom: 25px;
-            color: #334;
-        }
-
-        /* Client Message Bubble */
-        .client-message {
-            background: #f0f2f5;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            max-width: 80%;
-        }
-
-        .client-name {
-            font-size: 12px;
-            color: #667;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .client-text {
-            font-size: 16px;
-            color: #1a2b4a;
-        }
-
-        .scene-note {
-            font-size: 14px;
-            color: #667;
-            margin-top: 15px;
-            font-style: italic;
-        }
-
-        /* Branch Badge */
-        .branch-badge {
-            display: inline-block;
-            background: #c0503a;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        /* Options Grid */
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .options-grid.three-options {
-            grid-template-columns: 1fr;
-        }
-
-        .option-btn {
-            padding: 20px;
-            background: white;
-            border: 2px solid #1a2b4a;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 15px;
-            color: #1a2b4a;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            background: #f0f2f5;
-        }
-
-        .option-btn:disabled {
-            cursor: default;
-        }
-
-        .option-btn.correct {
-            background: #2d7a4f;
-            border-color: #2d7a4f;
-            color: white;
-        }
-
-        .option-btn.incorrect {
-            background: #c0503a;
-            border-color: #c0503a;
-            color: white;
-        }
-
-        .option-btn.partial {
-            background: #d4a012;
-            border-color: #d4a012;
-            color: white;
-        }
-
-        /* Explanation */
-        .explanation {
-            background: #f8f9fa;
-            border-left: 4px solid #1a2b4a;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-            display: none;
-        }
-
-        .explanation.show {
-            display: block;
-        }
-
-        .explanation-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1a2b4a;
-        }
-
-        /* Next Button */
-        .next-btn {
-            background: #c0503a;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 20px;
-            display: none;
-            font-family: inherit;
-        }
-
-        .next-btn.show {
-            display: inline-block;
-        }
-
-        .next-btn:hover {
-            background: #a04030;
-        }
-
-        /* Result Screen */
-        .result-screen {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .result-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .result-title {
-            font-size: 28px;
-            color: #1a2b4a;
-            margin-bottom: 20px;
-        }
-
-        .result-text {
-            font-size: 16px;
-            color: #334;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        .result-score {
-            font-size: 24px;
-            font-weight: 600;
-            color: #c0503a;
-            margin-bottom: 30px;
-        }
-
-        .result-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .result-btn {
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 600;
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .result-btn.primary {
-            background: #c0503a;
-            color: white;
-            border: none;
-        }
-
-        .result-btn.primary:hover {
-            background: #a04030;
-        }
-
-        .result-btn.secondary {
-            background: white;
-            color: #1a2b4a;
-            border: 2px solid #1a2b4a;
-        }
-
-        .result-btn.secondary:hover {
-            background: #f0f2f5;
-        }
-
-        .bonus-btn {
-            background: #d4a012;
-            color: white;
-            border: none;
-        }
-
-        .bonus-btn:hover {
-            background: #c49002;
-        }
-
-        /* Start Button */
-        .start-btn {
-            background: #c0503a;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 30px;
-            font-family: inherit;
-        }
-
-        .start-btn:hover {
-            background: #a04030;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .content {
-                padding: 25px 20px;
-            }
-
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
-
-            .progress-step {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Progress Bar -->
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-bar">
-                <div class="progress-line"></div>
-                <div class="progress-fill" id="progressFill"></div>
-                <div class="progress-step" data-step="0">0</div>
-                <div class="progress-step" data-step="1">1</div>
-                <div class="progress-step" data-step="2">2</div>
-                <div class="progress-step" data-step="3">3</div>
-                <div class="progress-step" data-step="4">4</div>
-                <div class="progress-step" data-step="5">5</div>
-            </div>
-        </div>
-
-        <!-- Score Display -->
-        <div class="score-display" id="scoreDisplay">
-            Баллы: <span id="scoreValue">0</span>
-        </div>
-
-        <!-- Content -->
-        <div class="content" id="content">
-            <!-- Dynamic content will be rendered here -->
-        </div>
-    </div>
-
-    <script>
-        // State variables
-        let currentStep = 0;
-        let currentBranch = null;
-        let score = 0;
-        let maxScore = 5;
-        let attemptCount = 0;
-        let answered = false;
-        let branchVPart = 0; // For branch V: 0 = first question, 1 = second question
-
-        // Branch labels
-        const branchLabels = {
-            'A': 'Клиент хочет скидку',
-            'B': 'Клиент не рассчитывал на сумму',
-            'V': 'Клиент видел дешевле у конкурента'
-        };
-
-        // Content data
-        const content = {
-            intro: {
-                title: 'Дело о потерянной сделке',
-                text: `Вы — старший консультант шоурума. К вам приходит коллега и просит разобрать ситуацию: клиент интересовался плиткой Kerama Marazzi, но в итоге ушёл «подумать». Разберите, что пошло не так — и как надо было действовать.`,
-                button: 'Начать разбор →'
-            },
-            scene: {
-                subtitle: 'Шоурум. Консультант только что завершил презентацию коллекции.',
-                clientMessage: 'Ого... это выходит дороговато для меня.',
-                note: 'Клиент замолчал и смотрит на ценник.',
-                question: 'Что сделал консультант дальше? Найдите ошибку.',
-                button: 'Смотреть →'
-            },
-            step1: {
-                context: '',
-                question: 'Клиент произнёс "дороговато". Первая реакция консультанта:',
-                options: [
-                    {
-                        text: '«Подождите, давайте объясню, из чего складывается цена»',
-                        correct: false,
-                        explanation: 'Перебивая клиента, вы лишаете его возможности высказаться. Он закрывается — и вы не узнаёте, что стоит за возражением.'
-                    },
-                    {
-                        text: 'Молчит. Кивает. Даёт клиенту договорить.',
-                        correct: true,
-                        explanation: 'Первый шаг — выслушать до конца. За словом "дорого" может стоять сравнение с конкурентом, неожиданная сумма или просто рефлекс. Пока не выслушали — не знаете, с чем работать.'
-                    },
-                    {
-                        text: '«Хорошо, могу предложить вам скидку»',
-                        correct: false,
-                        explanation: 'Скидка на первую же реплику — это потеря маржи без понимания проблемы. Если за "дорого" стоит что-то другое, скидка не поможет.'
-                    },
-                    {
-                        text: '«Именно! Давайте я покажу вам коллекцию подешевле»',
-                        correct: false,
-                        explanation: 'Вы решили за клиента, что ему не по карману, — без единого вопроса. Так теряются сделки в среднем и премиум-сегменте.'
-                    }
-                ]
-            },
-            step2: {
-                context: 'Клиент замолчал. Нужно среагировать так, чтобы он почувствовал: вы на его стороне.',
-                question: 'Что говорит консультант?',
-                options: [
-                    {
-                        text: '«Это совсем не дорого — для такого качества цена адекватная!»',
-                        correct: false,
-                        explanation: 'Спор о цене — тупик. Чем сильнее давите, тем сильнее клиент защищается.'
-                    },
-                    {
-                        text: '«Понятно...» (пауза, смотрит в сторону)',
-                        correct: false,
-                        explanation: 'Расплывчатая реакция читается как растерянность. Клиент перестаёт видеть в вас эксперта.'
-                    },
-                    {
-                        text: '«У нас сейчас акция, могу оформить рассрочку»',
-                        correct: false,
-                        explanation: 'Рассрочка — рабочий инструмент, но не сейчас. Вы ещё не знаете природу возражения, а уже прыгаете к финансовым решениям.'
-                    },
-                    {
-                        text: '«Конечно, деньги — это важно.»',
-                        correct: true,
-                        explanation: 'Короткое присоединение снимает напряжение. Клиент чувствует: вы не спорите — вы разделяете его позицию.'
-                    }
-                ]
-            },
-            step3: {
-                context: 'Вы присоединились. Теперь нужно понять, что стоит за словом "дорого": клиент хочет скидку, не рассчитывал на такую сумму или видел похожее дешевле. У каждой ситуации — свой ответ.',
-                question: 'Каким вопросом консультант уточняет возражение?',
-                options: [
-                    {
-                        text: '«Вы вообще серьёзно рассматриваете покупку?»',
-                        correct: false,
-                        explanation: 'Звучит как сомнение в намерениях клиента. Разрушает контакт именно тогда, когда нужно его укреплять.'
-                    },
-                    {
-                        text: '«Давайте я сразу покажу, что можно подобрать подешевле»',
-                        correct: false,
-                        explanation: 'Снова переход к дешёвому без запроса клиента. Вы теряете и маржу, и доверие.'
-                    },
-                    {
-                        text: '«С чем вы сравниваете?»',
-                        correct: true,
-                        explanation: 'Нейтральный открытый вопрос. Не давит, не ставит клиента в рамки бюджета — но даёт ключевую информацию для выбора дальнейшей тактики.'
-                    },
-                    {
-                        text: '«Сколько вы готовы потратить?»',
-                        partial: true,
-                        explanation: 'Рабочий вопрос, но прямолинейный — клиент может почувствовать себя загнанным в рамки бюджета. Лучше начать с нейтрального уточнения.'
-                    }
-                ]
-            },
-            step4: {
-                branchA: {
-                    clientMessage: '«Хотелось бы сэкономить... может, есть какая-то скидка?»',
-                    question: 'Что отвечает консультант?',
-                    options: [
-                        {
-                            text: '«Скидки у нас строго по системе — я сам ничего не решаю.»',
-                            correct: false,
-                            explanation: 'Перекладывание на "систему" убивает доверие. Клиент слышит: я не хочу вам помогать.'
-                        },
-                        {
-                            text: '«При комплексном заказе — плитка плюс сантехника — вы получаете скидку на весь товар. Это и сэкономит деньги, и избавит от поездок по городу.»',
-                            correct: true,
-                            explanation: 'Комплексная скидка выгодна обеим сторонам. Клиент экономит. Вы увеличиваете чек за счёт сантехники, обоев, смесителей.'
-                        },
-                        {
-                            text: '«Хорошо, давайте сделаю вам скидку 5%.»',
-                            correct: false,
-                            explanation: 'Скидка без условий — потеря маржи без пользы. Вы не узнали, что клиент готов купить.'
-                        },
-                        {
-                            text: '«Скидку не дам, но могу оформить рассрочку на 6 месяцев.»',
-                            correct: false,
-                            explanation: 'Рассрочка звучит как помощь, но вы уходите от разговора о ценности продукта. Плюс это обозначает, что клиент "не тянет" покупку.'
-                        }
-                    ]
-                },
-                branchB: {
-                    clientMessage: '«Я просто не рассчитывал на такую сумму...»',
-                    question: 'Что отвечает консультант?',
-                    options: [
-                        {
-                            text: '«Плитка всегда стоит денег — такова специфика рынка.»',
-                            correct: false,
-                            explanation: 'Констатация факта — не помощь. Клиент пришёл за решением, а не за справкой.'
-                        },
-                        {
-                            text: '«Давайте рассмотрим два варианта: либо альтернативная коллекция в нужном бюджете, либо уменьшим декоративные элементы. На дизайн-проекте подберём оптимальный баланс.»',
-                            correct: true,
-                            explanation: 'Вы не теряете клиента и не обесцениваете дорогой товар. Дизайн-проект удерживает клиента и привязывает его к конкретному решению именно у вас.'
-                        },
-                        {
-                            text: '«Тогда, может, выберем что-нибудь подешевле?»',
-                            correct: false,
-                            explanation: 'Вы сами обесцениваете дорогой товар. Клиент слышит: "вам это не по карману".'
-                        },
-                        {
-                            text: '«Наверняка бывало: брали дешевле — потом переплачивали?» (пауза, ждёт ответа)',
-                            correct: false,
-                            explanation: 'Это реальная шаблонная фраза — и она работает, но не здесь. Клиент не говорил о качестве. Вы создаёте проблему там, где её не было.'
-                        }
-                    ]
-                },
-                branchV: {
-                    part1: {
-                        clientMessage: '«Я видел похожую плитку в другом месте — там дешевле.»',
-                        question: 'Что спрашивает консультант первым делом?',
-                        options: [
-                            {
-                                text: '«Цены у нас единые по городу — скорее всего, вы ошибаетесь.»',
-                                correct: false,
-                                explanation: 'Вы ставите под сомнение слова клиента. Даже если он ошибаетесь — спорить с ним бессмысленно.'
-                            },
-                            {
-                                text: '«Ну там, наверное, качество хуже — вы же понимаете, за что платите.»',
-                                correct: false,
-                                explanation: 'Критика конкурентов — непрофессионально. Вы не знаете, что именно клиент видел.'
-                            },
-                            {
-                                text: '«В каком магазине вы видели? Это была именно эта коллекция Kerama Marazzi?»',
-                                correct: true,
-                                explanation: 'Принципиальный вопрос: клиент сравнивает нашу плитку с нашей (другой дилер) или с другим брендом? Это разные ответы — их нельзя смешивать.'
-                            }
-                        ]
-                    },
-                    part2: {
-                        clientMessage: '«Это была другая марка, не помню название.»',
-                        question: 'Что говорит консультант?',
-                        options: [
-                            {
-                                text: '«Ну вот видите — другая марка, некорректное сравнение.»',
-                                correct: false,
-                                explanation: 'Формально правы, но интонация "вы ошиблись" ставит клиента в неловкое положение.'
-                            },
-                            {
-                                text: '«Сравнивать разную плитку без учёта характеристик сложно. Только у нас вы можете составить дизайн-проект и купить плитку поштучно — не нужно переплачивать за лишние упаковки.»',
-                                correct: true,
-                                explanation: 'Вы не спорите о цене — вы говорите о том, что отличает вас от любого другого магазина: дизайн-проект и продажа поштучно.'
-                            },
-                            {
-                                text: '«Kerama Marazzi — это премиум, поэтому и цена другая.»',
-                                partial: true,
-                                explanation: 'Ссылка на бренд работает, но слабо без конкретных преимуществ. Нужно говорить выгодами, а не статусом.'
-                            },
-                            {
-                                text: '«Давайте я покажу вам похожие варианты, которые подешевле.»',
-                                correct: false,
-                                explanation: 'Переход к дешёвому без запроса клиента — потеря маржи и доверия одновременно.'
-                            }
-                        ]
-                    }
-                }
-            },
-            step5: {
-                context: 'Вы отработали возражение. Клиент кивает, но молчит. Самый частый провал — именно здесь.',
-                question: 'Что делает консультант?',
-                options: [
-                    {
-                        text: 'Молчит. Ждёт, когда клиент сам что-нибудь скажет.',
-                        correct: false,
-                        explanation: 'Пауза — подарок сомнениям клиента. В тишине он вспоминает все причины не покупать.'
-                    },
-                    {
-                        text: '«Итак, что вы решили? Давайте оформим?»',
-                        correct: true,
-                        explanation: 'Прямой вопрос о готовности — профессионально и не навязчиво. Инициатива у консультанта. Именно так завершаются сделки.'
-                    },
-                    {
-                        text: '«Ну вы подумайте — приходите, когда решите.»',
-                        correct: false,
-                        explanation: 'Вы сами отпускаете клиента. Инициатива потеряна.'
-                    },
-                    {
-                        text: 'Протягивает визитку: «Вот мои контакты — звоните, если надумаете.»',
-                        correct: false,
-                        explanation: 'Визитка — рабочий инструмент, но только если клиент уже сказал "нет" после всех аргументов. Здесь клиент ещё не ушёл — вы сами его отпускаете.'
-                    }
-                ]
-            },
-            bonus: {
-                title: 'Ловушка профессионала',
-                text: `Одна из самых частых ошибок — принять решение за клиента ещё до того, как он что-то сказал. Консультант смотрит на покупателя и думает: «Это ему слишком дорого» — и сам снижает планку презентации. Клиент ничего не просил, а уже получил бюджетный вариант.`,
-                situation: 'Клиент заходит в шоурум в простой одежде. Консультант сразу ведёт его к коллекции эконом-сегмента, не задав ни одного вопроса.',
-                question: 'Что не так в действиях консультанта?',
-                options: [
-                    {
-                        text: 'Он правильно среагировал — сразу учёл возможности клиента',
-                        correct: false,
-                        explanation: 'Внешность не определяет бюджет. Консультант, который "решает за клиента", теряет сделки в среднем и премиум-сегменте.'
-                    },
-                    {
-                        text: 'Он начал с показа товара, а не с вопросов',
-                        correct: false,
-                        explanation: 'Дело не в порядке — дело в том, что он выбрал товар по собственному предположению о бюджете клиента.'
-                    },
-                    {
-                        text: 'Он решил за клиента, что тому по карману — не спросив',
-                        correct: true,
-                        explanation: 'Правило простое: начинай с вопросов и показывай лучшее — пусть клиент сам скажет, если это не то.'
-                    }
-                ]
-            }
-        };
-
-        // Initialize
-        function init() {
-            const branches = ['A', 'B', 'V'];
-            currentBranch = branches[Math.floor(Math.random() * 3)];
-
-            if (currentBranch === 'V') {
-                maxScore = 6;
-            } else {
-                maxScore = 5;
-            }
-
-            currentStep = 0;
-            score = 0;
-            answered = false;
-            branchVPart = 0;
-
-            updateProgress();
-            renderScreen();
-        }
-
-        // Update progress bar
-        function updateProgress() {
-            const steps = document.querySelectorAll('.progress-step');
-            const progressFill = document.getElementById('progressFill');
-
-            steps.forEach((step, index) => {
-                step.classList.remove('active', 'completed');
-                if (index < currentStep) {
-                    step.classList.add('completed');
-                } else if (index === currentStep) {
-                    step.classList.add('active');
-                }
-            });
-
-            const progressPercent = (currentStep / 5) * 100;
-            progressFill.style.width = `${progressPercent}%`;
-
-            // Update step labels for branch V
-            if (currentBranch === 'V') {
-                steps[4].textContent = '4a';
-                steps[5].textContent = '4b';
-            } else {
-                steps[4].textContent = '4';
-                steps[5].textContent = '5';
-            }
-        }
-
-        // Render screen based on current step
-        function renderScreen() {
-            const contentDiv = document.getElementById('content');
-            contentDiv.innerHTML = '';
-
-            switch(currentStep) {
-                case 0:
-                    renderIntro(contentDiv);
-                    break;
-                case 1:
-                    renderScene(contentDiv);
-                    break;
-                case 2:
-                    renderStep(content.step1, 1);
-                    break;
-                case 3:
-                    renderStep(content.step2, 2);
-                    break;
-                case 4:
-                    renderStep(content.step3, 3);
-                    break;
-                case 5:
-                    renderStep4();
-                    break;
-                case 6:
-                    renderStep(content.step5, 5);
-                    break;
-                case 7:
-                    renderResult();
-                    break;
-                case 8:
-                    renderBonus();
-                    break;
-            }
-
-            document.getElementById('scoreValue').textContent = score.toFixed(1);
-        }
-
-        // Render intro screen
-        function renderIntro(container) {
-            container.innerHTML = `
-                <h1>${content.intro.title}</h1>
-                <p class="scene-text">${content.intro.text}</p>
-                <button class="start-btn" onclick="nextStep()">${content.intro.button}</button>
-            `;
-        }
-
-        // Render scene screen
-        function renderScene(container) {
-            container.innerHTML = `
-                <p class="context">${content.scene.subtitle}</p>
-                <div class="client-message">
-                    <div class="client-name">Клиент</div>
-                    <div class="client-text">${content.scene.clientMessage}</div>
-                </div>
-                <p class="scene-note">${content.scene.note}</p>
-                <h2 style="margin-top: 30px;">${content.scene.question}</h2>
-                <button class="start-btn" onclick="nextStep()">${content.scene.button}</button>
-            `;
-        }
-
-        // Render step with options
-        function renderStep(stepData, stepNumber) {
-            const contentDiv = document.getElementById('content');
-            const isThreeOptions = stepData.options.length === 3;
-
-            let html = '';
-
-            if (stepData.context) {
-                html += `<p class="context">${stepData.context}</p>`;
-            }
-
-            html += `<h2>${stepData.question}</h2>`;
-            html += `<div class="options-grid ${isThreeOptions ? 'three-options' : ''}">`;
-
-            stepData.options.forEach((option, index) => {
-                html += `<button class="option-btn" data-index="${index}" onclick="selectOption(this, ${stepNumber})">${option.text}</button>`;
-            });
-
-            html += `</div>`;
-            html += `<div class="explanation" id="explanation">`;
-            html += `<div class="explanation-title">Пояснение:</div>`;
-            html += `<div id="explanationText"></div>`;
-            html += `</div>`;
-            html += `<button class="next-btn" id="nextBtn" onclick="nextStep()">Далее →</button>`;
-
-            contentDiv.innerHTML = html;
-        }
-
-        // Render step 4 with branching
-        function renderStep4() {
-            const contentDiv = document.getElementById('content');
-            let stepData;
-
-            if (currentBranch === 'V' && branchVPart === 0) {
-                stepData = content.step4.branchV.part1;
-            } else if (currentBranch === 'V' && branchVPart === 1) {
-                stepData = content.step4.branchV.part2;
-            } else if (currentBranch === 'A') {
-                stepData = content.step4.branchA;
-            } else {
-                stepData = content.step4.branchB;
-            }
-
-            const isThreeOptions = stepData.options.length === 3;
-            const branchLabel = branchLabels[currentBranch];
-
-            let html = '';
-            html += `<span class="branch-badge">Ситуация: ${branchLabel}</span>`;
-            html += `<p class="context">Клиент отвечает:</p>`;
-            html += `<div class="client-message">`;
-            html += `<div class="client-name">Клиент</div>`;
-            html += `<div class="client-text">${stepData.clientMessage}</div>`;
-            html += `</div>`;
-            html += `<h2>${stepData.question}</h2>`;
-            html += `<div class="options-grid ${isThreeOptions ? 'three-options' : ''}">`;
-
-            stepData.options.forEach((option, index) => {
-                html += `<button class="option-btn" data-index="${index}" onclick="selectOption(this, 4)">${option.text}</button>`;
-            });
-
-            html += `</div>`;
-            html += `<div class="explanation" id="explanation">`;
-            html += `<div class="explanation-title">Пояснение:</div>`;
-            html += `<div id="explanationText"></div>`;
-            html += `</div>`;
-            html += `<button class="next-btn" id="nextBtn" onclick="nextStep()">Далее →</button>`;
-
-            contentDiv.innerHTML = html;
-        }
-
-        // Select option handler
-        function selectOption(button, stepNumber) {
-            if (answered) return;
-
-            answered = true;
-            const index = parseInt(button.getAttribute('data-index'));
-            let stepData;
-
-            if (stepNumber === 4) {
-                if (currentBranch === 'V' && branchVPart === 0) {
-                    stepData = content.step4.branchV.part1;
-                } else if (currentBranch === 'V' && branchVPart === 1) {
-                    stepData = content.step4.branchV.part2;
-                } else if (currentBranch === 'A') {
-                    stepData = content.step4.branchA;
-                } else {
-                    stepData = content.step4.branchB;
-                }
-            } else if (stepNumber === 1) {
-                stepData = content.step1;
-            } else if (stepNumber === 2) {
-                stepData = content.step2;
-            } else if (stepNumber === 3) {
-                stepData = content.step3;
-            } else if (stepNumber === 5) {
-                stepData = content.step5;
-            } else if (stepNumber === 8) {
-                stepData = content.bonus;
-            }
-
-            const option = stepData.options[index];
-            const buttons = document.querySelectorAll('.option-btn');
-
-            // Disable all buttons and highlight selected
-            buttons.forEach((btn, i) => {
-                btn.disabled = true;
-                if (i === index) {
-                    if (option.correct) {
-                        btn.classList.add('correct');
-                        score += 1;
-                    } else if (option.partial) {
-                        btn.classList.add('partial');
-                        score += 0.5;
-                    } else {
-                        btn.classList.add('incorrect');
-                    }
-                }
-            });
-
-            // Show explanation
-            const explanation = document.getElementById('explanation');
-            const explanationText = document.getElementById('explanationText');
-            explanationText.textContent = option.explanation;
-            explanation.classList.add('show');
-
-            // Show next button
-            const nextBtn = document.getElementById('nextBtn');
-            nextBtn.classList.add('show');
-
-            // Update score display
-            document.getElementById('scoreValue').textContent = score.toFixed(1);
-        }
-
-        // Next step handler
-        function nextStep() {
-            answered = false;
-
-            if (currentStep === 0) {
-                currentStep = 1;
-            } else if (currentStep === 1) {
-                currentStep = 2;
-            } else if (currentStep === 2) {
-                currentStep = 3;
-            } else if (currentStep === 3) {
-                currentStep = 4;
-            } else if (currentStep === 4) {
-                if (currentBranch === 'V' && branchVPart === 0) {
-                    branchVPart = 1;
-                    // Stay on step 4, but render part 2
-                } else {
-                    currentStep = 5;
-                }
-            } else if (currentStep === 5) {
-                currentStep = 6;
-            } else if (currentStep === 6) {
-                currentStep = 7;
-                attemptCount++;
-            } else if (currentStep === 7) {
-                currentStep = 8;
-            } else if (currentStep === 8) {
-                // Restart after bonus
-                init();
-                return;
-            }
-
-            updateProgress();
-            renderScreen();
-        }
-
-        // Render result screen
-        function renderResult() {
-            const contentDiv = document.getElementById('content');
-            const percentage = (score / maxScore) * 100;
-
-            let title, text, icon;
-
-            if (percentage >= 80) {
-                title = 'Сделка закрыта ✓';
-                text = 'Вы уверенно провели клиента через возражение: выслушали, присоединились, уточнили природу, ответили по существу и взяли инициативу в конце. Такой консультант закрывает сделку — клиент уходит не "думать", а с покупкой.';
-                icon = '🎉';
-            } else if (percentage >= 50) {
-                title = 'Почти — но клиент ушёл думать';
-                text = 'Вы знаете схему, но в одном-двух шагах потеряли инициативу или упустили уточнение. Именно в этих точках разрушается большинство сделок. Посмотрите на шаги с ошибкой.';
-                icon = '🤔';
-            } else {
-                title = 'Клиент ушёл. Разберёмся почему.';
-                text = 'Возражение "дорого" — не приговор для сделки. Это сигнал: клиент заинтересован, но ему нужна помощь. Перечитайте пояснения к каждому шагу — там ключ.';
-                icon = '📚';
-            }
-
-            let bonusButton = '';
-            if (attemptCount >= 2) {
-                bonusButton = `<button class="result-btn bonus-btn" onclick="renderBonusScreen()">Бонусный разбор →</button>`;
-            }
-
-            contentDiv.innerHTML = `
-                <div class="result-screen">
-                    <div class="result-icon">${icon}</div>
-                    <h1 class="result-title">${title}</h1>
-                    <p class="result-text">${text}</p>
-                    <div class="result-score">Ваш результат: ${score} из ${maxScore} баллов (${percentage.toFixed(0)}%)</div>
-                    <div class="result-buttons">
-                        <button class="result-btn primary" onclick="init()">Пройти ещё раз</button>
-                        <button class="result-btn secondary" onclick="initWithNewBranch()">Попробовать другую ситуацию</button>
-                        ${bonusButton}
-                    </div>
-                </div>
-            `;
-
-            // Hide progress bar on result screen
-            document.getElementById('progressContainer').style.display = 'none';
-        }
-
-        // Render bonus screen directly
-        function renderBonusScreen() {
-            currentStep = 8;
-            document.getElementById('progressContainer').style.display = 'block';
-            updateProgress();
-            renderScreen();
-        }
-
-        // Render bonus content
-        function renderBonus() {
-            const contentDiv = document.getElementById('content');
-            const stepData = content.bonus;
-
-            let html = '';
-            html += `<h1>${stepData.title}</h1>`;
-            html += `<p class="scene-text">${stepData.text}</p>`;
-            html += `<p class="context" style="margin-top: 20px;">${stepData.situation}</p>`;
-            html += `<h2 style="margin-top: 30px;">${stepData.question}</h2>`;
-            html += `<div class="options-grid three-options">`;
-
-            stepData.options.forEach((option, index) => {
-                html += `<button class="option-btn" data-index="${index}" onclick="selectOption(this, 8)">${option.text}</button>`;
-            });
-
-            html += `</div>`;
-            html += `<div class="explanation" id="explanation">`;
-            html += `<div class="explanation-title">Пояснение:</div>`;
-            html += `<div id="explanationText"></div>`;
-            html += `</div>`;
-            html += `<button class="next-btn" id="nextBtn" onclick="nextStep()">Завершить →</button>`;
-
-            contentDiv.innerHTML = html;
-        }
-
-        // Restart with new branch
-        function initWithNewBranch() {
-            const branches = ['A', 'B', 'V'];
-            let newBranch;
-            do {
-                newBranch = branches[Math.floor(Math.random() * 3)];
-            } while (newBranch === currentBranch);
-
-            currentBranch = newBranch;
-            init();
-        }
-
-        // Start the trainer
-        init();
-    </script>
-</body>
-</html>
-
-+++ index.html (修改后)
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1518,7 +463,7 @@
         const content = {
             intro: {
                 title: 'Дело о потерянной сделке',
-                text: `Вы — старший консультант шоурума. К вам приходит коллега и просит разобрать ситуацию: клиент интересовался плиткой Kerama Marazzi, но в итоге ушёл «подумать». Разберите, что пошло не так — и как надо было действовать.`,
+                text: `Вы - старший консультант шоурума. К вам приходит коллега и просит разобрать ситуацию: клиент интересовался плиткой Kerama Marazzi, но в итоге ушёл «подумать». Разберите, что пошло не так — и как надо было действовать.`,
                 button: 'Начать разбор →'
             },
             scene: {
@@ -1535,22 +480,22 @@
                     {
                         text: '«Подождите, давайте объясню, из чего складывается цена»',
                         correct: false,
-                        explanation: 'Перебивая клиента, вы лишаете его возможности высказаться. Он закрывается — и вы не узнаёте, что стоит за возражением.'
+                        explanation: 'Перебивая клиента, вы лишаете его возможности высказаться. Он закрывается - и вы не узнаёте, что стоит за возражением.'
                     },
                     {
                         text: 'Молчит. Кивает. Даёт клиенту договорить.',
                         correct: true,
-                        explanation: 'Первый шаг — выслушать до конца. За словом "дорого" может стоять сравнение с конкурентом, неожиданная сумма или просто рефлекс. Пока не выслушали — не знаете, с чем работать.'
+                        explanation: 'Первый шаг - выслушать до конца. За словом "дорого" может стоять сравнение с конкурентом, неожиданная сумма или просто рефлекс. Пока не выслушали — не знаете, с чем работать.'
                     },
                     {
                         text: '«Хорошо, могу предложить вам скидку»',
                         correct: false,
-                        explanation: 'Скидка на первую же реплику — это потеря маржи без понимания проблемы. Если за "дорого" стоит что-то другое, скидка не поможет.'
+                        explanation: 'Скидка на первую же реплику - это потеря маржи без понимания проблемы. Если за "дорого" стоит что-то другое, скидка не поможет.'
                     },
                     {
                         text: '«Именно! Давайте я покажу вам коллекцию подешевле»',
                         correct: false,
-                        explanation: 'Вы решили за клиента, что ему не по карману, — без единого вопроса. Так теряются сделки в среднем и премиум-сегменте.'
+                        explanation: 'Вы решили за клиента, что ему не по карману, без единого вопроса. Так теряются сделки в среднем и премиум-сегменте.'
                     }
                 ]
             },
@@ -1561,7 +506,7 @@
                     {
                         text: '«Это совсем не дорого — для такого качества цена адекватная!»',
                         correct: false,
-                        explanation: 'Спор о цене — тупик. Чем сильнее давите, тем сильнее клиент защищается.'
+                        explanation: 'Спор о цене приводит в тупик. Чем сильнее давите, тем сильнее клиент защищается.'
                     },
                     {
                         text: '«Понятно...» (пауза, смотрит в сторону)',
@@ -1571,10 +516,10 @@
                     {
                         text: '«У нас сейчас акция, могу оформить рассрочку»',
                         correct: false,
-                        explanation: 'Рассрочка — рабочий инструмент, но не сейчас. Вы ещё не знаете природу возражения, а уже прыгаете к финансовым решениям.'
+                        explanation: 'Рассрочка - рабочий инструмент, но не сейчас. Вы ещё не знаете природу возражения, а уже прыгаете к финансовым решениям.'
                     },
                     {
-                        text: '«Конечно, деньги — это важно.»',
+                        text: '«Конечно, деньги - это важно.»',
                         correct: true,
                         explanation: 'Короткое присоединение снимает напряжение. Клиент чувствует: вы не спорите — вы разделяете его позицию.'
                     }
@@ -1597,12 +542,12 @@
                     {
                         text: '«С чем вы сравниваете?»',
                         correct: true,
-                        explanation: 'Нейтральный открытый вопрос. Не давит, не ставит клиента в рамки бюджета — но даёт ключевую информацию для выбора дальнейшей тактики.'
+                        explanation: 'Нейтральный открытый вопрос. Не давит, не ставит клиента в рамки бюджета - но даёт ключевую информацию для выбора дальнейшей тактики.'
                     },
                     {
                         text: '«Сколько вы готовы потратить?»',
                         partial: true,
-                        explanation: 'Рабочий вопрос, но прямолинейный — клиент может почувствовать себя загнанным в рамки бюджета. Лучше начать с нейтрального уточнения.'
+                        explanation: 'Рабочий вопрос, но прямолинейный - клиент может почувствовать себя загнанным в рамки бюджета. Лучше начать с нейтрального уточнения.'
                     }
                 ]
             },
@@ -1612,24 +557,24 @@
                     question: 'Что отвечает консультант?',
                     options: [
                         {
-                            text: '«Скидки у нас строго по системе — я сам ничего не решаю.»',
+                            text: '«Скидки у нас строго по системе - я сам ничего не решаю.»',
                             correct: false,
                             explanation: 'Перекладывание на "систему" убивает доверие. Клиент слышит: я не хочу вам помогать.'
                         },
                         {
-                            text: '«При комплексном заказе — плитка плюс сантехника — вы получаете скидку на весь товар. Это и сэкономит деньги, и избавит от поездок по городу.»',
+                            text: '«При комплексном заказе - плитка плюс сантехника — вы получаете скидку на весь товар. Это и сэкономит деньги, и избавит от поездок по городу.»',
                             correct: true,
                             explanation: 'Комплексная скидка выгодна обеим сторонам. Клиент экономит. Вы увеличиваете чек за счёт сантехники, обоев, смесителей.'
                         },
                         {
                             text: '«Хорошо, давайте сделаю вам скидку 5%.»',
                             correct: false,
-                            explanation: 'Скидка без условий — потеря маржи без пользы. Вы не узнали, что клиент готов купить.'
+                            explanation: 'Скидка без условий - потеря маржи без пользы. Вы не узнали, что клиент готов купить.'
                         },
                         {
                             text: '«Скидку не дам, но могу оформить рассрочку на 6 месяцев.»',
                             correct: false,
-                            explanation: 'Рассрочка звучит как помощь, но вы уходите от разговора о ценности продукта. Плюс это обозначает, что клиент "не тянет" покупку.'
+                            explanation: 'Рассрочка звучит как помощь, но вы уходите от разговора о ценности продукта. Плюс это обозначает, что клиент финансово "не тянет" покупку.'
                         }
                     ]
                 },
@@ -1638,9 +583,9 @@
                     question: 'Что отвечает консультант?',
                     options: [
                         {
-                            text: '«Плитка всегда стоит денег — такова специфика рынка.»',
+                            text: '«Плитка всегда стоит денег - такова специфика рынка.»',
                             correct: false,
-                            explanation: 'Констатация факта — не помощь. Клиент пришёл за решением, а не за справкой.'
+                            explanation: 'Констатация факта не является помощью. Клиент пришёл за решением, а не за справкой.'
                         },
                         {
                             text: '«Давайте рассмотрим два варианта: либо альтернативная коллекция в нужном бюджете, либо уменьшим декоративные элементы. На дизайн-проекте подберём оптимальный баланс.»',
@@ -1653,31 +598,31 @@
                             explanation: 'Вы сами обесцениваете дорогой товар. Клиент слышит: "вам это не по карману".'
                         },
                         {
-                            text: '«Наверняка бывало: брали дешевле — потом переплачивали?» (пауза, ждёт ответа)',
+                            text: '«Наверняка бывало: брали дешевле - потом переплачивали?» (пауза, ждёт ответа)',
                             correct: false,
-                            explanation: 'Это реальная шаблонная фраза — и она работает, но не здесь. Клиент не говорил о качестве. Вы создаёте проблему там, где её не было.'
+                            explanation: 'Это реальная шаблонная фраза и она работает, но не здесь. Клиент не говорил о качестве. Вы создаёте проблему там, где её не было.'
                         }
                     ]
                 },
                 branchV: {
                     part1: {
-                        clientMessage: '«Я видел похожую плитку в другом месте — там дешевле.»',
+                        clientMessage: '«Я видел похожую плитку в другом месте - там дешевле.»',
                         question: 'Что спрашивает консультант первым делом?',
                         options: [
                             {
-                                text: '«Цены у нас единые по городу — скорее всего, вы ошибаетесь.»',
+                                text: '«Цены у нас единые по городу - скорее всего, вы ошибаетесь.»',
                                 correct: false,
                                 explanation: 'Вы ставите под сомнение слова клиента. Даже если он ошибаетесь — спорить с ним бессмысленно.'
                             },
                             {
-                                text: '«Ну там, наверное, качество хуже — вы же понимаете, за что платите.»',
+                                text: '«Ну там, наверное, качество хуже - вы же понимаете, за что платите.»',
                                 correct: false,
-                                explanation: 'Критика конкурентов — непрофессионально. Вы не знаете, что именно клиент видел.'
+                                explanation: 'Критика конкурентов - непрофессионально. Вы не знаете, что именно клиент видел.'
                             },
                             {
                                 text: '«В каком магазине вы видели? Это была именно эта коллекция Kerama Marazzi?»',
                                 correct: true,
-                                explanation: 'Принципиальный вопрос: клиент сравнивает нашу плитку с нашей (другой дилер) или с другим брендом? Это разные ответы — их нельзя смешивать.'
+                                explanation: 'Принципиальный вопрос: клиент сравнивает нашу плитку с нашей (другой дилер) или с другим брендом? Это разные ответы - их нельзя смешивать.'
                             }
                         ]
                     },
@@ -1686,24 +631,24 @@
                         question: 'Что говорит консультант?',
                         options: [
                             {
-                                text: '«Ну вот видите — другая марка, некорректное сравнение.»',
+                                text: '«Ну вот видите - другая марка, некорректное сравнение.»',
                                 correct: false,
                                 explanation: 'Формально правы, но интонация "вы ошиблись" ставит клиента в неловкое положение.'
                             },
                             {
-                                text: '«Сравнивать разную плитку без учёта характеристик сложно. Только у нас вы можете составить дизайн-проект и купить плитку поштучно — не нужно переплачивать за лишние упаковки.»',
+                                text: '«Сравнивать разную плитку без учёта характеристик сложно. Только у нас вы можете составить дизайн-проект и купить плитку поштучно - не нужно переплачивать за лишние упаковки.»',
                                 correct: true,
-                                explanation: 'Вы не спорите о цене — вы говорите о том, что отличает вас от любого другого магазина: дизайн-проект и продажа поштучно.'
+                                explanation: 'Вы не спорите о цене - вы говорите о том, что отличает вас от любого другого магазина: дизайн-проект и продажа поштучно.'
                             },
                             {
-                                text: '«Kerama Marazzi — это премиум, поэтому и цена другая.»',
+                                text: '«Kerama Marazzi - это премиум, поэтому и цена другая.»',
                                 partial: true,
                                 explanation: 'Ссылка на бренд работает, но слабо без конкретных преимуществ. Нужно говорить выгодами, а не статусом.'
                             },
                             {
                                 text: '«Давайте я покажу вам похожие варианты, которые подешевле.»',
                                 correct: false,
-                                explanation: 'Переход к дешёвому без запроса клиента — потеря маржи и доверия одновременно.'
+                                explanation: 'Переход к дешёвому без запроса клиента - потеря маржи и доверия одновременно.'
                             }
                         ]
                     }
@@ -1716,12 +661,12 @@
                     {
                         text: 'Молчит. Ждёт, когда клиент сам что-нибудь скажет.',
                         correct: false,
-                        explanation: 'Пауза — подарок сомнениям клиента. В тишине он вспоминает все причины не покупать.'
+                        explanation: 'Пауза - подарок сомнениям клиента. В тишине он вспоминает все причины не покупать.'
                     },
                     {
                         text: '«Итак, что вы решили? Давайте оформим?»',
                         correct: true,
-                        explanation: 'Прямой вопрос о готовности — профессионально и не навязчиво. Инициатива у консультанта. Именно так завершаются сделки.'
+                        explanation: 'Прямой вопрос о готовности - профессионально и не навязчиво. Инициатива у консультанта. Именно так завершаются сделки.'
                     },
                     {
                         text: '«Ну вы подумайте — приходите, когда решите.»',
@@ -1731,25 +676,25 @@
                     {
                         text: 'Протягивает визитку: «Вот мои контакты — звоните, если надумаете.»',
                         correct: false,
-                        explanation: 'Визитка — рабочий инструмент, но только если клиент уже сказал "нет" после всех аргументов. Здесь клиент ещё не ушёл — вы сами его отпускаете.'
+                        explanation: 'Визитка - рабочий инструмент, но только если клиент уже сказал "нет" после всех аргументов. Здесь клиент ещё не ушёл — вы сами его отпускаете.'
                     }
                 ]
             },
             bonus: {
                 title: 'Ловушка профессионала',
-                text: `Одна из самых частых ошибок — принять решение за клиента ещё до того, как он что-то сказал. Консультант смотрит на покупателя и думает: «Это ему слишком дорого» — и сам снижает планку презентации. Клиент ничего не просил, а уже получил бюджетный вариант.`,
+                text: `Одна из самых частых ошибок - принять решение за клиента ещё до того, как он что-то сказал. Консультант смотрит на покупателя и думает: «Это ему слишком дорого» — и сам снижает планку презентации. Клиент ничего не просил, а уже получил бюджетный вариант.`,
                 situation: 'Клиент заходит в шоурум в простой одежде. Консультант сразу ведёт его к коллекции эконом-сегмента, не задав ни одного вопроса.',
                 question: 'Что не так в действиях консультанта?',
                 options: [
                     {
-                        text: 'Он правильно среагировал — сразу учёл возможности клиента',
+                        text: 'Он правильно среагировал - сразу учёл возможности клиента',
                         correct: false,
                         explanation: 'Внешность не определяет бюджет. Консультант, который "решает за клиента", теряет сделки в среднем и премиум-сегменте.'
                     },
                     {
                         text: 'Он начал с показа товара, а не с вопросов',
                         correct: false,
-                        explanation: 'Дело не в порядке — дело в том, что он выбрал товар по собственному предположению о бюджете клиента.'
+                        explanation: 'Дело не в порядке - дело в том, что он выбрал товар по собственному предположению о бюджете клиента.'
                     },
                     {
                         text: 'Он решил за клиента, что тому по карману — не спросив',
